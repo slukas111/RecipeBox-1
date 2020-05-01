@@ -1,0 +1,10 @@
+<a href="/">Home</a>
+<h1>Recipes</h1>
+
+<ul>
+    {% for x in data %}
+        <li><a href="/recipe_details/{{x.id}}">
+            {{ x }} | by {{ x.author.name }}
+        </li></a>
+    {% endfor %}
+</ul>
