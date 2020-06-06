@@ -2,13 +2,12 @@ from django.shortcuts import render, reverse, HttpResponseRedirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-
-
+from django.contrib.auth.models import User
 from recipe.models import Recipe, Author
-from recipe.forms import AddRecipeForm, AddAuthorForm, LoginForm
+from recipe.forms import AddRecipeForm, AddAuthorForm, LoginForm, RecipeEditForm
 
 
-# Create your views here.
+
 def login_view(request):
     html = "generic_form.html"
 
@@ -17,28 +16,27 @@ def login_view(request):
         if form.is_valid():
             data = form.cleaned_data
             user = authenticate(
-                request,
-                username=data['username'],
-                password=data['password']
-                )
+                request, username=data["username"], password=data["password"]
+            )
             if user:
                 login(request, user)
                 return HttpResponseRedirect(
-                    request.GET.get('next', reverse('homepage'))
-                    )
+                    request.GET.get("next", reverse("homepage"))
+                )
     form = LoginForm()
-    return render(request, html, {'form': form})
+    return render(request, html, {"form": form})
 
 
 def logout_view(request):
     if request.user:
         logout(request)
-    return HttpResponseRedirect(reverse('homepage'))
+    return HttpResponseRedirect(reverse("homepage"))
 
 
 def index(request):
     data = Recipe.objects.all()
-    return render(request, 'index.html', {'data': data})
+    author = Author.objects.all()
+    return render(request, "index.html", {"data": data, "author": author})
 
 
 @login_required
@@ -50,36 +48,68 @@ def add_recipe(request):
         if form.is_valid():
             data = form.cleaned_data
             Recipe.objects.create(
-                title=data['title'],
-                author=data['author'],
-                description=data['description'],
-                time_required=data['time_required'],
-                instructions=data['instructions'],
-                )
-        return HttpResponseRedirect(reverse('homepage'))
+                title=data["title"],
+                author=data["author"],
+                description=data["description"],
+                time_required=data["time_required"],
+                instructions=data["instructions"],
+            )
+        return HttpResponseRedirect(reverse("homepage"))
     form = AddRecipeForm()
-    return render(request, html, {'form': form})
+    return render(request, html, {"form": form})
 
-
-@staff_member_required
-def add_author(request):
-    html = "generic_form.html"
-
+def author_add(request):
+    html = "author_add.html"
+    form = AddAuthorForm()
     if request.method == "POST":
         form = AddAuthorForm(request.POST)
-        form.save()
-        return HttpResponseRedirect(reverse('homepage'))
+        if form.is_valid():
+            data = form.cleaned_data
+            author = User.objects.create_user(username=data["name"])
+            Author.objects.create(user=author, name=data["name"], bio=data.get("bio"))
+        return HttpResponseRedirect(reverse("homepage"))
 
-    form = AddAuthorForm()
-    return render(request, html, {'form': form})
+    return render(request, html, {"form": form})
 
 
 def recipe_details(request, id):
     data = Recipe.objects.get(id=id)
-    return render(request, 'recipe_details.html', {'data': data})
+    return render(request, "recipe_details.html", {"data": data})
 
 
 def author(request, id):
     data = Author.objects.get(id=id)
-    recipes = Recipe.objects.filter(author=Author.objects.get(id=id))
-    return render(request, 'author.html', {'data': data, 'recipes': recipes})
+    user_data = Recipe.objects.filter(author=Author.objects.get(id=id))
+    return render(request, "author.html", {"data": data, "user_data": user_data})
+
+@login_required
+def favorite(request, id):
+    username = request.user.author
+    favrecipe = Recipe.objects.get(id=id)
+    username.favorites.add(favrecipe)
+    username.save()
+    return HttpResponseRedirect(reverse('recipes', kwargs={'id':id,}))
+
+
+def unfavorite(request, id):
+    username = request.user.author
+    favrecipe = Recipe.objects.get(id=id)
+    username.favorites.remove(favrecipe)
+    username.save()
+    return HttpResponseRedirect(reverse('recipes', kwargs={'id':id,}))
+
+
+def recipe_edit(request, id):
+    html = "recipe_edit.html"
+    recipe = Recipe.objects.get(id=id)
+    if request.method == "POST":
+        form = RecipeEditForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            recipe.title = data["title"]
+            recipe.description = data["body"]
+            recipe.save()
+            return HttpResponseRedirect(reverse("recipes", args=(id,)))
+    form = RecipeEditForm(initial={"title": recipe.title, "body": recipe.description})
+    return render(request, html, {"form": form, "recipe": recipe})
+

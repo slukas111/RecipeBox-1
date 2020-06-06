@@ -1,4 +1,10 @@
-<a href="/">Home</a>
+{% comment %} <a href="/">Home</a> {% endcomment %}
+<html>
+<head>
+    <title> Cookbook </title>
+</head>
+    <h1> Homepage Cookbook</h1>
+<body>
 
 <p>
     {% if request.user.is_authenticated%}
@@ -12,18 +18,21 @@
     {% if request.user.is_authenticated %}
         <a href="add_recipe/">Add Recipe</a>
         {% if request.user.is_staff %}
-            <a href="add_author/">Add Author</a>
+            <a href="author_add/">Add Author</a>
         {% endif %}
     {% endif %}
 </p>
 
 
-<h1>Recipes</h1>
+    <h1>Recipes</h1>
 
 <ul>
-    {% for x in data %}
-        <li><a href="/recipe_details/{{x.id}}">
-            {{ x }}</a> | by <a href="/author/{{x.author.id}}"ç>{{ x.author.name }}</a>
+    {% for recipe in data %}
+        <li><a href="/recipe_details/{{recipe.id}}">
+            {{ recipe }}</a> | by <a href="/author/{{recipe.author.id}}"ç>{{ recipe.author.name }}</a>
         </li>
     {% endfor %}
 </ul>
+
+</body>
+</html>

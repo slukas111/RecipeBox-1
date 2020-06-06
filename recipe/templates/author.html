@@ -3,9 +3,9 @@
 <h2>{{data.name}}</h2>
 <h3>{{data.bio}}</h3>
 <ul>
-    {% for x in recipes %}
-        <li><a href="/recipe_details/{{x.id}}">
-        {{ x.title }}
+    {% for recipe in recipes %}
+        <li><a href="/recipe_details/{{recipe.id}}">
+        {{ recipe.title }}
         </li></a>
     {% endfor %}
 </ul>
