@@ -3,9 +3,8 @@
 <h2>{{data.name}}</h2>
 <h3>{{data.bio}}</h3>
 <ul>
-    {% for recipe in recipes %}
-        <li><a href="/recipe_details/{{recipe.id}}">
-        {{ recipe.title }}
-        </li></a>
-    {% endfor %}
-</ul>
+
+        <h4>Favorites:</h4>
+    {% for recipe in user_data.favorites.all%}
+     <a href = {%url 'recipes' user_data=recipe.id%}>{{recipe.title}}</a>
+    {%endfor%}
