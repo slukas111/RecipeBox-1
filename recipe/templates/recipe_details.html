@@ -11,15 +11,17 @@
 
 
 
-        
+    {% if request.user.is_authenticated%}
 
-    {% if user.is_staff or user == data.author.user%}
+    {% if request.user == data.author.user or request.user.is_superuser %}
         <a href='/favorite/{{data.id}}'><button>Favorite</button></a>
-        {% else %}
+    {% else %}
         <a href='/unfavorite/{{data.id}}'><button>Unfavorite</button></a>
         {% endif %} 
+    {%endif%}
 
-    {% if user.is_staff or user == data.author.user%}
+
+    {% if request.user == data.author.user or request.user.is_superuser %}
     <a href="/recipe_edit/{{data.id}}"><button>Edit</button></a>
     {% endif %}
 
