@@ -13,7 +13,8 @@
 
     {% if request.user.is_authenticated%}
 
-    {% if request.user == data.author.user or request.user.is_superuser %}
+
+    {% if favorites is False %}
         <a href='/favorite/{{data.id}}'><button>Favorite</button></a>
     {% else %}
         <a href='/unfavorite/{{data.id}}'><button>Unfavorite</button></a>
@@ -25,4 +26,4 @@
     <a href="/recipe_edit/{{data.id}}"><button>Edit</button></a>
     {% endif %}
 
-    <p>{{favorite}}</p>
+    <p>{{favorites}}</p>

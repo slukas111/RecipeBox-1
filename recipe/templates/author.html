@@ -5,6 +5,9 @@
 <ul>
 
         <h4>Favorites:</h4>
-    {% for recipe in user_data.favorites.all%}
-     <a href = {%url 'recipes' user_data=recipe.id%}>{{recipe.title}}</a>
+    {% for recipe in favorites%}
+     <a href = {%url 'recipes' id=recipe.id%}>{{recipe.title}}</a>
+
+     {{recipe}}
     {%endfor%}
+

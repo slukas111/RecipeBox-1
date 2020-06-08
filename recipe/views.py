@@ -56,8 +56,11 @@ def add_recipe(request):
             )
         return HttpResponseRedirect(reverse("homepage"))
     form = AddRecipeForm()
-    return render(request, html, {"form": form})
+    return render(request, html, {'form': form})
 
+
+@login_required
+@staff_member_required
 def author_add(request):
     html = "author_add.html"
     form = AddAuthorForm()
@@ -74,29 +77,36 @@ def author_add(request):
 
 def recipe_details(request, id):
     data = Recipe.objects.get(id=id)
-    return render(request, "recipe_details.html", {"data": data})
+    if data in request.user.author.favorites.all(): 
+        favorites = True 
+    else:
+        favorites = False
+    return render(request, "recipe_details.html", {"data": data, "favorites": favorites})
 
 
 def author(request, id):
     data = Author.objects.get(id=id)
     user_data = Recipe.objects.filter(author=Author.objects.get(id=id))
-    return render(request, "author.html", {"data": data, "user_data": user_data})
+    favorites = data.favorites.all()
+    return render(request, "author.html", {"data": data, "user_data": user_data, "favorites": favorites})
+
+
 
 @login_required
 def favorite(request, id):
     username = request.user.author
     favrecipe = Recipe.objects.get(id=id)
     username.favorites.add(favrecipe)
-    username.save()
-    return HttpResponseRedirect(reverse('recipes', kwargs={'id':id,}))
 
+    return HttpResponseRedirect(reverse('recipes', kwargs={'id':id}))
 
+@login_required
 def unfavorite(request, id):
     username = request.user.author
     favrecipe = Recipe.objects.get(id=id)
     username.favorites.remove(favrecipe)
-    username.save()
-    return HttpResponseRedirect(reverse('recipes', kwargs={'id':id,}))
+
+    return HttpResponseRedirect(reverse('recipes', kwargs={'id':id}))
 
 
 def recipe_edit(request, id):
